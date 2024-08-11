@@ -1,0 +1,58 @@
+service: movie-library-backend
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  region: us-east-1
+  environment:
+    MOVIES_TABLE: ${self:service}-${opt:stage, 'dev'}-movies
+
+functions:
+  listMovies:
+    handler: handler.listMovies
+    events:
+      - http:
+          path: movies
+          method: get
+
+  getMovie:
+    handler: handler.getMovie
+    events:
+      - http:
+          path: movies/{id}
+          method: get
+
+  createMovie:
+    handler: handler.createMovie
+    events:
+      - http:
+          path: movies
+          method: post
+
+  updateMovie:
+    handler: handler.updateMovie
+    events:
+      - http:
+          path: movies/{id}
+          method: put
+
+  deleteMovie:
+    handler: handler.deleteMovie
+    events:
+      - http:
+          path: movies/{id}
+          method: delete
+
+resources:
+  Resources:
+    MoviesTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:provider.environment.MOVIES_TABLE}
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
